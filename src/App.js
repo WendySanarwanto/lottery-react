@@ -8,7 +8,8 @@ class App extends Component {
   state = {
     manager: '',
     balance: '',
-    players: []
+    players: [],
+    value: ''
   };
 
   async componentDidMount(){
@@ -27,13 +28,30 @@ class App extends Component {
       .then((response) => {
         console.log(`[DEBUG] - <App> Accounts: \n`, response);
       });
-
+    console.log(`[DEBUG] - <App> this.state.value: ${this.state.value}`);
     return (
       <div>
-        <h2>Lottery Contract</h2>
+        <div className="App">
+          <header className="App-header">
+            <img src={logo} className="App-logo" alt="logo" />
+            <h1 className="App-title">Welcome to Lottery Contract</h1>
+          </header>  
+        </div>      
         <p>This contract is managed by {this.state.manager}</p>
         <p>There are currently {this.state.players.length} people entered,</p>
         <p>competing to win {web3.utils.fromWei(this.state.balance, 'ether')} ether.</p>
+        
+        <hr/>
+
+        <form>
+          <h4>Hello, do you want to play a game ?</h4>
+          <div>
+            <label>Please enter amount of your ether, to enter the game</label>
+            &nbsp;&nbsp;<input value={this.state.value}
+              onChange={event => this.setState({ value: event.target.value})} />
+          </div>
+        </form>
+
       </div>
     );
   }
