@@ -5,10 +5,9 @@ import lottery from './lottery';
 import web3 from './web3';
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { manager: ''};
-  }
+  state = {
+    manager: ''
+  };
 
   async componentDidMount(){
     const manager = await lottery.methods.manager().call();
@@ -21,7 +20,7 @@ class App extends Component {
       .then((response) => {
         console.log(`[DEBUG] - <App> Accounts: \n`, response);
       });
-    
+
     return (
       <div>
         <h2>Lottery Contract</h2>
