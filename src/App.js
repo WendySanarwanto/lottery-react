@@ -23,16 +23,22 @@ class App extends Component {
 
   async componentDidMount(){
     const manager = await lottery.methods.manager().call();
+    this.setState({manager});
+
     await this.pickGameInfo();
+  }
+
+  async getCurrentAccount() {
+    const accounts = await web3.eth.getAccounts();
+    console.log(`[DEBUG] - <App.getCurrentAccount> accounts: \n${JSON.stringify( accounts, " ", 2)}\nvalue: ${this.state.value}`);
+
+    return Array.isArray(accounts) && accounts.length > 0 ? accounts[0] : undefined;
   }
 
   onSubmit = async (event) => {
     event.preventDefault();
 
-    const accounts = await web3.eth.getAccounts();    
-    console.log(`[DEBUG] - <App.onSubmit> accounts: \n${JSON.stringify( accounts, " ", 2)}\nvalue: ${this.state.value}`);
-
-    const account = Array.isArray(accounts) && accounts.length > 0 ? accounts[0] : undefined;
+    const account = this.getCurrentAccount();
 
     if (!account) {
       console.log(`[ERROR] - <App.onSubmit> cannot find available account.`);
@@ -45,9 +51,9 @@ class App extends Component {
     //       Therefore, we need to put some kind of processing feedback indicator to user.
 
     try {
-      this.setState({enteringPlayerStatus: `Waiting for transaction success ... `});      
+      this.setState({enteringPlayerStatus: `Waiting on transaction success ... `});
       await lottery.methods.enter().send({
-        from: accounts[0],
+        from: account,
         value: web3.utils.toWei(this.state.value, 'ether')
       });
 
@@ -57,6 +63,25 @@ class App extends Component {
       await this.pickGameInfo();
     } catch(err) {
       this.setState({enteringPlayerStatus: `Entering the game is failing: ${err.message}`});
+    }
+  }
+
+  onClick = async(event) => {
+    const account = await this.getCurrentAccount();
+
+    if (!account) {
+      console.log(`[ERROR] - <App.onSubmit> cannot find available account.`);
+      return;
+    }
+
+    try {
+      this.setState({enteringPlayerStatus: `Waiting on transaction success ... `});
+      await lottery.methods.pickWinner().send({
+        from: account
+      });
+      this.setState({enteringPlayerStatus: `A winner has been picked!`});
+    } catch(err) {
+      this.setState({enteringPlayerStatus: `Picking a winner is failing: ${err.message}`});
     }
   }
 
@@ -97,7 +122,13 @@ class App extends Component {
 
         <hr/>
 
+        <h4>Ready to pick a winner ?</h4>
+        <button onClick={this.onClick}>Pick a winner</button>
+
+        <hr/>
+
         <h1>{this.state.enteringPlayerStatus}</h1>
+
 
       </div>
     );
