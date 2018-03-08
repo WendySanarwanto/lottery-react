@@ -18,19 +18,21 @@ class App extends Component {
     const balance = await web3.eth.getBalance(lottery.options.address);
 
     this.setState({players});
-    this.setState({balance});    
+    this.setState({balance});
+    // console.log(`[DEBUG] - <App.pickGameInfo> players: \n${JSON.stringify(players, " ", 2)}\nbalance: ${balance}`);
   }
 
   async componentDidMount(){
     const manager = await lottery.methods.manager().call();
     this.setState({manager});
 
+    // console.log(`[DEBUG] - <App.componentDidMount> Calling 'pickGameInfo' ...`);
     await this.pickGameInfo();
   }
 
   async getCurrentAccount() {
     const accounts = await web3.eth.getAccounts();
-    console.log(`[DEBUG] - <App.getCurrentAccount> accounts: \n${JSON.stringify( accounts, " ", 2)}\nvalue: ${this.state.value}`);
+    // console.log(`[DEBUG] - <App.getCurrentAccount> accounts: \n${JSON.stringify( accounts, " ", 2)}\nvalue: ${this.state.value}`);
 
     return Array.isArray(accounts) && accounts.length > 0 ? accounts[0] : undefined;
   }
@@ -38,10 +40,10 @@ class App extends Component {
   onSubmit = async (event) => {
     event.preventDefault();
 
-    const account = this.getCurrentAccount();
+    const account = await this.getCurrentAccount();
 
     if (!account) {
-      console.log(`[ERROR] - <App.onSubmit> cannot find available account.`);
+      // console.log(`[ERROR] - <App.onSubmit> cannot find available account.`);
       return;
     }
 
@@ -52,6 +54,7 @@ class App extends Component {
 
     try {
       this.setState({enteringPlayerStatus: `Waiting on transaction success ... `});
+      // console.log(`[DEBUG] - <App.onSubmit> Before calling 'lottery.enter()', 'account' is `, account);
       await lottery.methods.enter().send({
         from: account,
         value: web3.utils.toWei(this.state.value, 'ether')
@@ -62,6 +65,7 @@ class App extends Component {
       this.setState({enteringPlayerStatus: `You have entered the game.`});
       await this.pickGameInfo();
     } catch(err) {
+      // TODO: Should display nice looking error message when the user rejects transaction(s)
       this.setState({enteringPlayerStatus: `Entering the game is failing: ${err.message}`});
     }
   }
@@ -86,12 +90,12 @@ class App extends Component {
   }
 
   render() {
-    console.log(`[DEBUG] - <App> web3.version: ${web3.version}`);
+    // console.log(`[DEBUG] - <App> web3.version: ${web3.version}`);
     web3.eth.getAccounts()
       .then((response) => {
-        console.log(`[DEBUG] - <App> Accounts: \n`, response);
+        // console.log(`[DEBUG] - <App> Accounts: \n`, response);
       });
-    console.log(`[DEBUG] - <App> this.state.value: ${this.state.value}`);
+    // console.log(`[DEBUG] - <App> this.state.value: ${this.state.value}`);
     return (
       <div>
         <div className="App">
